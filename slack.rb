@@ -17,13 +17,16 @@ class Slack
     @message = []
   end
 
-  def self.syndicate(events, dry_run: true)
+  def self.syndicate(events, dry_run)
     return if events.empty?
 
     @payload = self.payload(events)
 
-    self.post unless dry_run
-    puts self.message_json if dry_run
+    if dry_run
+      puts self.message_json
+    else 
+     self.post
+    end
   end
 
   def self.payload(events)
