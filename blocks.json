@@ -1,0 +1,59 @@
+{
+	"blocks": [
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "Check out these great events coming up!"
+			}
+		},
+		{
+			"type": "divider"
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "*Tampa Devs* - *Selling Yourself: The Art of Interviewing*\n:calendar: 2023-06-21T18:30-04:00 - PT2H\n:busts_in_silhouette: 1528 going\n\n *Description:* They do have some vegan options, like the roti and curry, plus they have a ton of salad stuff and noodles can be ordered without meat!! They have something for everyone here\n\n*Location:* <https://www.google.com/maps/dir/?api=1&destination=l|Embarc Collective 802 E Whiting St Tampa FL 33602>"
+			},
+			"accessory": {
+				"type": "image",
+				"image_url": "https://secure-content.meetupstatic.com/images/classic-events/512959870/676x380.webp",
+				"alt_text": "Tampa Devs - Selling Yourself: The Art of Interviewing"
+			}
+		},
+		{
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": ":dart: RSVP",
+						"emoji": true
+					},
+					"value": "see_all_meetups",
+					"url": "https://tampa.dev"
+				}
+			]
+		},
+		{
+			"type": "divider"
+		},
+		{
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": ":earth_americas: See All Meetups",
+						"emoji": true
+					},
+					"value": "see_all_meetups",
+					"url": "https://tampa.dev"
+				}
+			]
+		}
+	]
+}
