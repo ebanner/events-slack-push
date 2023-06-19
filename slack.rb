@@ -51,11 +51,21 @@ class Slack
             type: "button",
             text: {
               type: "plain_text",
-              text: ":earth_americas: See All Meetups",
+              text: ":earth_americas: All Meetups",
               emoji: true
             },
             value: "see_all_meetups",
             url: "https://tampa.dev"
+          },
+          {
+            type: "button",
+            text: {
+              type: "plain_text",
+              text: ":zap: Events API",
+              emoji: true
+            },
+            value: "events_api",
+            url: "https://github.com/TampaDevs/events.api.tampa.dev"
           }
         ]
       }
