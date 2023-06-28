@@ -66,6 +66,16 @@ class Slack
             },
             value: "events_api",
             url: "https://github.com/TampaDevs/events.api.tampa.dev"
+          }, 
+          {
+            type: "button",
+            text: {
+              type: "plain_text",
+              text: ":briefcase: Hire a Developer",
+              emoji: true
+            },
+            value: "events_api",
+            url: "https://talent.tampa.dev"
           }
         ]
       }
