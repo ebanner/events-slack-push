@@ -20,16 +20,16 @@ class MeetupEvent
     parts.join(', ') + " long"
   end
 
-  def self.within_next_seven_days?(date_string)
+  def self.within_next_two_weeks?(date_string)
     date = Date.parse(date_string)
     today = Date.today
-    date >= today && date <= (today + 7)
+    date >= today && date <= (today + 14)
   end
 
   def self.format_slack(group)
     return if group['eventSearch']['count'] == 0
 
-    return unless within_next_seven_days?(group['eventSearch']['edges'][0]['node']['dateTime'])
+    return unless within_next_two_weeks?(group['eventSearch']['edges'][0]['node']['dateTime'])
 
 		event_blocks = [{
 			type: "section",
