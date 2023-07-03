@@ -35,7 +35,7 @@ class Slack
           type: "section",
           text: {
             type: "mrkdwn",
-            text: ":balloon: Upcoming events for this week:"
+            text: ":balloon: Upcoming events:"
           }
         },
         {
