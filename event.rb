@@ -54,15 +54,6 @@ class MeetupEvent
 						emoji: true
 					},
 					url: group['eventSearch']['edges'][0]['node']['eventUrl']
-				},
-				{
-					type: "button",
-					text: {
-						type: "plain_text",
-						text: ":dizzy: All Events",
-						emoji: true
-					},
-					url: group['link']
 				}
 			]
 		},
