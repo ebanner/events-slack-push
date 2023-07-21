@@ -93,17 +93,22 @@ class Slack
   def self.post
     return if @payload.length == 0
 
-    uri = URI.parse(ENV["TD_SLACK_WEBHOOK"])
-    https = Net::HTTP.new(uri.host, uri.port)
-    https.use_ssl = true
+    targets = [ENV["TD_SLACK_WEBHOOK"], ENV["TBT_SLACK_WEBHOOK"]]
 
-    request = Net::HTTP::Post.new(uri.request_uri)
-    request['Accept'] = 'application/json'
-    request.content_type = 'application/json'
-    request.body = {
-      blocks: @payload
-    }.to_json
+    targets.each do |t|
+      uri = URI.parse(t)
+      https = Net::HTTP.new(uri.host, uri.port)
+      https.use_ssl = true
 
-    https.request(request)
+      request = Net::HTTP::Post.new(uri.request_uri)
+      request['Accept'] = 'application/json'
+      request.content_type = 'application/json'
+      request.body = {
+        blocks: @payload
+      }.to_json
+
+      response = https.request(request)
+      puts "#{response.code} #{response.message}: #{response.body}"
+    end
   end
 end
