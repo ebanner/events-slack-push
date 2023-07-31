@@ -93,7 +93,7 @@ class Slack
   def self.post
     return if @payload.length == 0
 
-    targets = [ENV["TD_SLACK_WEBHOOK"], ENV["TBT_SLACK_WEBHOOK"]]
+    targets = [ENV["TD_SLACK_WEBHOOK"]]
 
     targets.each do |t|
       uri = URI.parse(t)
