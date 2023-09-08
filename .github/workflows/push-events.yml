@@ -22,3 +22,4 @@ jobs:
       env:
         SYN_ENV: production
         TD_SLACK_WEBHOOK: ${{ secrets.TD_SLACK_WEBHOOK }}
+        TBT_SLACK_WEBHOOK: ${{ secrets.TBT_SLACK_WEBHOOK }}
