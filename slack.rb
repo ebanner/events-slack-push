@@ -55,7 +55,7 @@ class Slack
               emoji: true
             },
             value: "see_all_meetups",
-            url: "https://tampa.dev"
+            url: "https://tampa.dev?utm_source=td_slack_syndication&utm_campaign=organic"
           },
           {
             type: "button",
@@ -75,7 +75,17 @@ class Slack
               emoji: true
             },
             value: "events_api",
-            url: "https://talent.tampa.dev"
+            url: "https://talent.tampa.dev?utm_source=td_slack_syndication&utm_campaign=organic"
+          },
+          {
+            type: "button",
+            text: {
+              type: "plain_text",
+              text: ":newspaper: Tampa Hacker News",
+              emoji: true
+            },
+            value: "news_tampa_dev",
+            url: "https://news.tampa.dev?utm_source=td_slack_syndication&utm_campaign=organic"
           }
         ]
       }
