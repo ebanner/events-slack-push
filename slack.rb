@@ -1,17 +1,17 @@
 # frozen_string_literal: true
 
-require 'uri'
-require 'net/https'
-require 'json'
+require "uri"
+require "net/https"
+require "json"
 
 class Slack
   attr_accessor :keys, :message, :post_types, :utm_params
 
   def initialize
     @utm_params = {
-      source: 'td_slack',
-      medium: 'organic',
-      campaign: 'tampadevs_meetup_promo'
+      source: "td_slack",
+      medium: "organic",
+      campaign: "tampadevs_meetup_promo"
     }
 
     @message = []
@@ -20,28 +20,28 @@ class Slack
   def self.syndicate(events, dry_run)
     return if events.empty?
 
-    @payload = self.payload(events)
+    @payload = payload(events)
 
     if dry_run
-      puts self.message_json
-    else 
-     self.post
+      puts message_json
+    else
+      post
     end
   end
 
   def self.payload(events)
-    header =  [
-        {
-          type: "section",
-          text: {
-            type: "mrkdwn",
-            text: ":balloon: Upcoming events:"
-          }
-        },
-        {
-          type: "divider"
+    header = [
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: ":balloon: Upcoming events:"
         }
-      ]
+      },
+      {
+        type: "divider"
+      }
+    ]
 
     footer = [
       {
@@ -66,7 +66,7 @@ class Slack
             },
             value: "events_api",
             url: "https://github.com/TampaDevs/events.api.tampa.dev"
-          }, 
+          },
           {
             type: "button",
             text: {
@@ -81,7 +81,7 @@ class Slack
             type: "button",
             text: {
               type: "plain_text",
-              text: ":newspaper: Tampa Hacker News",
+              text: ":newspaper: Tampa Tech News",
               emoji: true
             },
             value: "news_tampa_dev",
@@ -111,8 +111,8 @@ class Slack
       https.use_ssl = true
 
       request = Net::HTTP::Post.new(uri.request_uri)
-      request['Accept'] = 'application/json'
-      request.content_type = 'application/json'
+      request["Accept"] = "application/json"
+      request.content_type = "application/json"
       request.body = {
         blocks: @payload
       }.to_json
