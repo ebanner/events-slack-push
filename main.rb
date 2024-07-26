@@ -13,7 +13,7 @@ class EventSyndicator
   end
 
   def fetch
-    groups = JSON.parse(Net::HTTP.get(URI("https://events.api.tampa.dev/")))
+    groups = JSON.parse(Net::HTTP.get(URI("http://localhost:8787/next-hour")))
 
     sorted_events = []
     formatted_events = []

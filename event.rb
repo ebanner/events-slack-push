@@ -1,6 +1,33 @@
-# frozen_string_literal: true
-
 require "date"
+
+
+def truncate_string(text, max_length = 1000)
+  paragraphs = text.split("\n")
+
+  paragraphs.each do |string|
+    puts string
+    puts
+  end
+
+  selected_paragraphs = []
+  current_length = 0
+
+  paragraphs.each do |paragraph|
+    paragraph_length = paragraph.length + 2 # Adding 2 for the "\n\n" that will be re-inserted
+    if current_length + paragraph_length > max_length
+      selected_paragraphs << '...'
+      break
+    else
+      selected_paragraphs << paragraph
+      current_length += paragraph_length
+    end
+  end
+
+  truncated_text = selected_paragraphs.join("\n")
+
+  truncated_text.rstrip # Remove any trailing newlines
+end
+
 
 class MeetupEvent
   # Can be used like so:
@@ -31,11 +58,25 @@ class MeetupEvent
 
     return unless within_next_two_weeks?(group["eventSearch"]["edges"][0]["node"]["dateTime"])
 
-    event_blocks = [{
+    if group["eventSearch"]["edges"][0]["node"]["venue"]
+      group["eventSearch"]["edges"][0]["node"]["location"] = if group["eventSearch"]["edges"][0]["node"]["venue"]["name"] != "Online event"
+        ":round_pushpin: <https://www.google.com/maps/dir/?api=1&destination=#{group["eventSearch"]["edges"][0]["node"]["venue"].map { |k, v| "#{k}=#{URI.encode_www_form_component(v)}" }.join("&")}|#{group["eventSearch"]["edges"][0]["node"]["venue"].values.join(", ")}>"
+      else
+        ":computer: Online event"
+      end
+    end
+
+    event_blocks = [
+    {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: "*#{group["name"]}* - *#{group["eventSearch"]["edges"][0]["node"]["title"]}*\n:calendar: #{DateTime.parse(group["eventSearch"]["edges"][0]["node"]["dateTime"]).strftime("%A, %d %B %Y, %I:%M %p")}\n:busts_in_silhouette: #{group["eventSearch"]["edges"][0]["node"]["going"]} going"
+        text: <<-HEREDOC
+*#{group["name"]}* - *#{group["eventSearch"]["edges"][0]["node"]["title"]}*
+:clock1: #{DateTime.parse(group["eventSearch"]["edges"][0]["node"]["dateTime"]).strftime("%I:%M %p")}
+#{group["eventSearch"]["edges"][0]["node"]["location"]}
+:busts_in_silhouette: #{group["eventSearch"]["edges"][0]["node"]["going"]} going
+HEREDOC
       },
       accessory: {
         type: "image",
@@ -43,34 +84,38 @@ class MeetupEvent
         alt_text: "#{group["name"]} - #{group["eventSearch"]["edges"][0]["node"]["title"]}"
       }
     },
-      {
-        type: "actions",
-        elements: [
-          {
-            type: "button",
-            text: {
-              type: "plain_text",
-              text: ":dart: RSVP",
-              emoji: true
-            },
-            url: group["eventSearch"]["edges"][0]["node"]["eventUrl"]
-          }
-        ]
-      },
-      {
-        type: "divider"
-      }]
+    {
+      type: "actions",
+      elements: [
+        {
+          type: "button",
+          text: {
+            type: "plain_text",
+            text: ":meetup: Event Details",
+            emoji: true
+          },
+          url: group["eventSearch"]["edges"][0]["node"]["eventUrl"]
+        }
+      ]
+    },
+		{
+			"type": "rich_text",
+			"elements": [
+				{
+					"type": "rich_text_quote",
+					"elements": [
+						{
+							"type": "text",
+							"text": truncate_string(group["eventSearch"]["edges"][0]["node"]["description"]),
+						}
+					]
+				}
+			]
+		}
+    ]
 
     if group["name"] == "Tampa Devs"
       event_blocks[0][:text][:text].prepend(":tampadevs: ")
-    end
-
-    if group["eventSearch"]["edges"][0]["node"]["venue"]
-      event_blocks[0][:text][:text] += if group["eventSearch"]["edges"][0]["node"]["venue"]["name"] != "Online event"
-        "\n\n:round_pushpin: <https://www.google.com/maps/dir/?api=1&destination=#{group["eventSearch"]["edges"][0]["node"]["venue"].map { |k, v| "#{k}=#{URI.encode_www_form_component(v)}" }.join("&")}|#{group["eventSearch"]["edges"][0]["node"]["venue"].values.join(", ")}>"
-      else
-        "\n\n:computer: Online event"
-      end
     end
 
     event_blocks

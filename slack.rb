@@ -31,67 +31,27 @@ class Slack
 
   def self.payload(events)
     header = [
+      # {
+      #   type: "section",
+      #   text: {
+      #     type: "mrkdwn",
+      #     text: "_:loudspeaker: 60 minutes until this event:_"
+      #   }
+      # },
       {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text: ":balloon: Upcoming events:"
+        "type": "header",
+        "text": {
+            "type": "plain_text",
+            "text": ":loudspeaker: 60 minutes until this event"
         }
-      },
-      {
-        type: "divider"
-      }
+    },
     ]
 
-    footer = [
-      {
-        type: "actions",
-        elements: [
-          {
-            type: "button",
-            text: {
-              type: "plain_text",
-              text: ":earth_americas: All Meetups",
-              emoji: true
-            },
-            value: "see_all_meetups",
-            url: "https://tampa.dev?utm_source=td_slack_syndication&utm_campaign=organic"
-          },
-          {
-            type: "button",
-            text: {
-              type: "plain_text",
-              text: ":zap: Events API",
-              emoji: true
-            },
-            value: "events_api",
-            url: "https://github.com/TampaDevs/events.api.tampa.dev"
-          },
-          {
-            type: "button",
-            text: {
-              type: "plain_text",
-              text: ":briefcase: Hire a Developer",
-              emoji: true
-            },
-            value: "events_api",
-            url: "https://talent.tampa.dev?utm_source=td_slack_syndication&utm_campaign=organic"
-          },
-          {
-            type: "button",
-            text: {
-              type: "plain_text",
-              text: ":newspaper: Tampa Tech News",
-              emoji: true
-            },
-            value: "news_tampa_dev",
-            url: "https://news.tampa.dev?utm_source=td_slack_syndication&utm_campaign=organic"
-          }
-        ]
-      }
-    ]
+    # puts events
 
-    [header, events.reduce([], :concat), footer].reduce([], :concat)
+    puts JSON.pretty_generate(events.reduce([], :concat))
+
+    [header, events.reduce([], :concat)].reduce([], :concat)
   end
 
   def self.message_json
@@ -103,7 +63,7 @@ class Slack
   def self.post
     return if @payload.length == 0
 
-    targets = [ENV["TD_SLACK_WEBHOOK"], ENV["TBT_SLACK_WEBHOOK"], ENV["TBUX_SLACK_WEBHOOK"]]
+    targets = [ENV["TD_SLACK_WEBHOOK"]]
 
     targets.each do |t|
       uri = URI.parse(t)
