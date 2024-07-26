@@ -32,7 +32,7 @@ class Slack
 
   def self.payload(events)
     if @announcement_type == 'weekly'
-      header_text = ":balloon: Upcoming Events"
+      header_text = ":balloon: Happening This Week"
     elsif @announcement_type == 'daily'
       header_text = ":earth_americas: Happening Today"
     else
@@ -101,7 +101,6 @@ class Slack
     ]
 
     elements = [header, events.reduce([], :concat)]
-    puts @announcement_type
     if @announcement_type == 'weekly'
       elements << footer
     end
