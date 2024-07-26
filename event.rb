@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "date"
+require "time"
 
 class MeetupEvent
   # Can be used like so:
@@ -20,16 +21,38 @@ class MeetupEvent
     parts.join(", ") + " long"
   end
 
-  def self.within_next_two_weeks?(date_string)
+  def self.within_next_week?(date_string)
     date = Date.parse(date_string)
     today = Date.today
-    date >= today && date <= (today + 14)
+    date >= today && date <= (today + 7)
   end
 
-  def self.format_slack(group)
+  def self.within_next_day?(date_string)
+    date = Date.parse(date_string)
+    today = Date.today
+    # today = Date.parse('2024-07-29T10:00-04:00')
+    date == today
+  end
+
+  def self.within_next_hour?(date_string)
+    datetime = Time.parse(date_string)
+    now = Time.now
+    # now = Time.parse('2024-07-29T18:00-04:00')
+    one_hour_from_now = now + 3600
+    datetime >= now && datetime <= one_hour_from_now
+  end
+
+  def self.format_slack(group, announcement_type)
     return if group["eventSearch"]["count"] == 0
 
-    return unless within_next_two_weeks?(group["eventSearch"]["edges"][0]["node"]["dateTime"])
+    date_string = group["eventSearch"]["edges"][0]["node"]["dateTime"]
+    if announcement_type == "weekly"
+      return unless within_next_week?(date_string)
+    elsif announcement_type == "daily"
+      return unless within_next_day?(date_string)
+    else 
+      return unless within_next_hour?(date_string)
+    end
 
     event_blocks = [{
       type: "section",
@@ -57,9 +80,7 @@ class MeetupEvent
           }
         ]
       },
-      {
-        type: "divider"
-      }]
+    ]
 
     if group["name"] == "Tampa Devs"
       event_blocks[0][:text][:text].prepend(":tampadevs: ")
