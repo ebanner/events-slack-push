@@ -61,6 +61,16 @@ class Slack
             type: "button",
             text: {
               type: "plain_text",
+              text: ":calendar: Event Calendar",
+              emoji: true
+            },
+            value: "newsletter_tampa_dev",
+            url: "https://go.tampa.dev/calendar?utm_source=td_slack_syndication&utm_campaign=organic"
+          },
+          {
+            type: "button",
+            text: {
+              type: "plain_text",
               text: ":zap: Events API",
               emoji: true
             },
@@ -71,7 +81,7 @@ class Slack
             type: "button",
             text: {
               type: "plain_text",
-              text: ":briefcase: Hire a Developer",
+              text: ":briefcase: Local Tech Jobs",
               emoji: true
             },
             value: "events_api",
@@ -81,11 +91,11 @@ class Slack
             type: "button",
             text: {
               type: "plain_text",
-              text: ":newspaper: Tampa Tech News",
+              text: ":newspaper: Newsletter",
               emoji: true
             },
-            value: "news_tampa_dev",
-            url: "https://news.tampa.dev?utm_source=td_slack_syndication&utm_campaign=organic"
+            value: "newsletter_tampa_dev",
+            url: "https://newsletter.tampa.dev?utm_source=td_slack_syndication&utm_campaign=organic"
           }
         ]
       }
