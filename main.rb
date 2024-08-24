@@ -19,13 +19,11 @@ class EventSyndicator
     formatted_events = []
 
     groups.each do |group|
-      sorted_events << group[1] unless group[1]["eventSearch"]["count"] == 0
+      sorted_events << group[1] unless group[1]["unifiedEvents"]["count"] == 0 || group[1]["unifiedEvents"]["edges"].empty?
     end
 
-    sorted_events.reject! { |e| e["eventSearch"]["edges"].empty? }
- 
     sorted_events.sort! do |a, b| 
-      DateTime.parse(a["eventSearch"]["edges"][0]["node"]["dateTime"]) <=> DateTime.parse(b["eventSearch"]["edges"][0]["node"]["dateTime"])
+      DateTime.parse(a["unifiedEvents"]["edges"][0]["node"]["dateTime"]) <=> DateTime.parse(b["unifiedEvents"]["edges"][0]["node"]["dateTime"])
     end
 
     sorted_events.each do |group|

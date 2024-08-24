@@ -4,7 +4,7 @@ require "date"
 
 class MeetupEvent
   # Can be used like so:
-  # \n:clock1: #{parse_duration(group['eventSearch']['edges'][0]['node']['duration'])
+  # \n:clock1: #{parse_duration(group['unifiedEvents']['edges'][0]['node']['duration'])
   def self.parse_duration(iso8601_duration)
     match = iso8601_duration.match(/PT((?<hours>\d+(?:\.\d+)?)H)?((?<minutes>\d+(?:\.\d+)?)M)?((?<seconds>\d+(?:\.\d+)?)S)?/)
 
@@ -27,20 +27,20 @@ class MeetupEvent
   end
 
   def self.format_slack(group)
-    return if group["eventSearch"]["count"] == 0
+    return if group["unifiedEvents"]["count"] == 0
 
-    return unless within_next_two_weeks?(group["eventSearch"]["edges"][0]["node"]["dateTime"])
+    return unless within_next_two_weeks?(group["unifiedEvents"]["edges"][0]["node"]["dateTime"])
 
     event_blocks = [{
       type: "section",
       text: {
         type: "mrkdwn",
-        text: "*#{group["name"]}* - *#{group["eventSearch"]["edges"][0]["node"]["title"]}*\n:calendar: #{DateTime.parse(group["eventSearch"]["edges"][0]["node"]["dateTime"]).strftime("%A, %d %B %Y, %I:%M %p")}\n:busts_in_silhouette: #{group["eventSearch"]["edges"][0]["node"]["going"]} going"
+        text: "*#{group["name"]}* - *#{group["unifiedEvents"]["edges"][0]["node"]["title"]}*\n:calendar: #{DateTime.parse(group["unifiedEvents"]["edges"][0]["node"]["dateTime"]).strftime("%A, %d %B %Y, %I:%M %p")}\n:busts_in_silhouette: #{group["unifiedEvents"]["edges"][0]["node"]["going"]} going"
       },
       accessory: {
         type: "image",
-        image_url: group["eventSearch"]["edges"][0]["node"]["imageUrl"],
-        alt_text: "#{group["name"]} - #{group["eventSearch"]["edges"][0]["node"]["title"]}"
+        image_url: group["unifiedEvents"]["edges"][0]["node"]["imageUrl"],
+        alt_text: "#{group["name"]} - #{group["unifiedEvents"]["edges"][0]["node"]["title"]}"
       }
     },
       {
@@ -53,7 +53,7 @@ class MeetupEvent
               text: ":dart: RSVP",
               emoji: true
             },
-            url: group["eventSearch"]["edges"][0]["node"]["eventUrl"]
+            url: group["unifiedEvents"]["edges"][0]["node"]["eventUrl"]
           }
         ]
       },
@@ -65,9 +65,9 @@ class MeetupEvent
       event_blocks[0][:text][:text].prepend(":tampadevs: ")
     end
 
-    if group["eventSearch"]["edges"][0]["node"]["venue"]
-      event_blocks[0][:text][:text] += if group["eventSearch"]["edges"][0]["node"]["venue"]["name"] != "Online event"
-        "\n\n:round_pushpin: <https://www.google.com/maps/dir/?api=1&destination=#{group["eventSearch"]["edges"][0]["node"]["venue"].map { |k, v| "#{k}=#{URI.encode_www_form_component(v)}" }.join("&")}|#{group["eventSearch"]["edges"][0]["node"]["venue"].values.join(", ")}>"
+    if group["unifiedEvents"]["edges"][0]["node"]["venue"]
+      event_blocks[0][:text][:text] += if group["unifiedEvents"]["edges"][0]["node"]["venue"]["name"] != "Online event"
+        "\n\n:round_pushpin: <https://www.google.com/maps/dir/?api=1&destination=#{group["unifiedEvents"]["edges"][0]["node"]["venue"].map { |k, v| "#{k}=#{URI.encode_www_form_component(v)}" }.join("&")}|#{group["unifiedEvents"]["edges"][0]["node"]["venue"].values.join(", ")}>"
       else
         "\n\n:computer: Online event"
       end
