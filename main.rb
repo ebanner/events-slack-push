@@ -2,6 +2,7 @@
 
 require "json"
 require "net/http"
+require 'optparse'
 require_relative "event"
 require_relative "slack"
 
@@ -12,29 +13,32 @@ class EventSyndicator
     @dry_run = ENV["SYN_ENV"] != "production"
   end
 
-  def fetch
-    argument = ARGV[0]
-    if argument == '--weekly'
-      announcement_type = 'weekly'
-    elsif argument == '--daily'
-      announcement_type = 'daily'
-    else
-      announcement_type = 'hourly'
+  def fetch(announcement_type, destinations)
+
+    events_url = case announcement_type
+      when :weekly
+        'https://events.api.tampa.dev?within_days=7'
+      when :daily
+        'https://events.api.tampa.dev?within_hours=24'
+      when :hourly
+        'https://events.api.tampa.dev?within_hours=1'
     end
 
-    groups = JSON.parse(Net::HTTP.get(URI("https://events.api.tampa.dev/")))
+    groups = JSON.parse(Net::HTTP.get(URI(events_url)))
 
     sorted_events = []
     formatted_events = []
 
     groups.each do |group|
-      sorted_events << group[1] unless group[1]["eventSearch"]["count"] == 0
+      sorted_events << group[1] unless group[1]["unifiedEvents"]["count"] == 0 || group[1]["unifiedEvents"]["edges"].empty?
     end
 
-    sorted_events.sort! { |a, b| DateTime.parse(a["eventSearch"]["edges"][0]["node"]["dateTime"]) <=> DateTime.parse(b["eventSearch"]["edges"][0]["node"]["dateTime"]) }
+    sorted_events.sort! do |a, b| 
+      DateTime.parse(a["unifiedEvents"]["edges"][0]["node"]["dateTime"]) <=> DateTime.parse(b["unifiedEvents"]["edges"][0]["node"]["dateTime"])
+    end
 
     sorted_events.each do |group|
-      event = MeetupEvent.format_slack(group, announcement_type)
+      event = MeetupEvent.format_slack(group)
       formatted_events << event unless event.nil?
     end
 
@@ -48,10 +52,38 @@ class EventSyndicator
       exit
     end
 
-    Slack.syndicate(formatted_events, announcement_type, @dry_run)
+    Slack.syndicate(formatted_events, announcement_type, destinations, @dry_run)
   end
 end
 
-syn = EventSyndicator.new
-syn.fetch
+def main
+  options = {}
+  OptionParser.new do |opts|
+    opts.banner = "Usage: main.rb [options]"
 
+    # Boolean argument for --daily, --hourly, or --weekly
+    announcement_types = [:daily, :hourly, :weekly]
+    opts.on("--daily", "Set announcement type to daily") do
+      options[:announcement_type] = :daily
+    end
+    opts.on("--hourly", "Set announcement type to hourly") do
+      options[:announcement_type] = :hourly
+    end
+    opts.on("--weekly", "Set announcement type to weekly") do
+      options[:announcement_type] = :weekly
+    end
+
+    # Argument for --destinations=<destinations>
+    opts.on("--destinations=DESTINATIONS", "Comma-separated list of destinations") do |destinations|
+      options[:destinations] = destinations.split(',')
+    end
+  end.parse!
+
+  announcement_type = options[:announcement_type] || :weekly
+  destinations = options[:destinations] || ['TD', 'TBT', 'TBUX']
+
+  syn = EventSyndicator.new
+  syn.fetch(announcement_type, destinations)
+end
+
+main

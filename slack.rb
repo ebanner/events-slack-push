@@ -17,26 +17,26 @@ class Slack
     @message = []
   end
 
-  def self.syndicate(events, announcement_type, dry_run)
+  def self.syndicate(events, announcement_type, destinations, dry_run)
     return if events.empty?
 
-    @announcement_type = announcement_type
-    @payload = payload(events)
+    @payload = payload(events, announcement_type)
 
     if dry_run
       puts message_json
     else
-      post
+      post destinations
     end
   end
 
-  def self.payload(events)
-    if @announcement_type == 'weekly'
-      header_text = ":balloon: Happening This Week"
-    elsif @announcement_type == 'daily'
-      header_text = ":earth_americas: Happening Today"
-    else
-      header_text = ":loudspeaker: Happening Soon"
+  def self.payload(events, announcement_type)
+    header_text = case announcement_type
+      when :weekly
+        ":balloon: Happening This Week"
+      when :daily
+        ":earth_americas: Happening Today"
+      when :hourly
+        ":loudspeaker: Happening Soon"
     end
     header = [
       {
@@ -70,6 +70,16 @@ class Slack
             type: "button",
             text: {
               type: "plain_text",
+              text: ":calendar: Event Calendar",
+              emoji: true
+            },
+            value: "newsletter_tampa_dev",
+            url: "https://go.tampa.dev/calendar?utm_source=td_slack_syndication&utm_campaign=organic"
+          },
+          {
+            type: "button",
+            text: {
+              type: "plain_text",
               text: ":zap: Events API",
               emoji: true
             },
@@ -80,7 +90,7 @@ class Slack
             type: "button",
             text: {
               type: "plain_text",
-              text: ":briefcase: Hire a Developer",
+              text: ":briefcase: Local Tech Jobs",
               emoji: true
             },
             value: "events_api",
@@ -90,11 +100,11 @@ class Slack
             type: "button",
             text: {
               type: "plain_text",
-              text: ":newspaper: Tampa Tech News",
+              text: ":newspaper: Newsletter",
               emoji: true
             },
-            value: "news_tampa_dev",
-            url: "https://news.tampa.dev?utm_source=td_slack_syndication&utm_campaign=organic"
+            value: "newsletter_tampa_dev",
+            url: "https://newsletter.tampa.dev?utm_source=td_slack_syndication&utm_campaign=organic"
           }
         ]
       }
@@ -114,10 +124,12 @@ class Slack
     }.to_json
   end
 
-  def self.post
+  def self.post(destinations)
     return if @payload.length == 0
 
-    targets = [ENV["TD_SLACK_WEBHOOK"]]
+    targets = destinations.map do |channel|
+      ENV["#{channel}_SLACK_WEBHOOK"]
+    end
 
     targets.each do |t|
       uri = URI.parse(t)

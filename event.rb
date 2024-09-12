@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
 require "date"
-require "time"
 
 class MeetupEvent
   # Can be used like so:
-  # \n:clock1: #{parse_duration(group['eventSearch']['edges'][0]['node']['duration'])
+  # \n:clock1: #{parse_duration(group['unifiedEvents']['edges'][0]['node']['duration'])
   def self.parse_duration(iso8601_duration)
     match = iso8601_duration.match(/PT((?<hours>\d+(?:\.\d+)?)H)?((?<minutes>\d+(?:\.\d+)?)M)?((?<seconds>\d+(?:\.\d+)?)S)?/)
 
@@ -21,49 +20,19 @@ class MeetupEvent
     parts.join(", ") + " long"
   end
 
-  def self.within_next_week?(date_string)
-    date = Date.parse(date_string)
-    today = Date.today
-    date >= today && date <= (today + 7)
-  end
-
-  def self.within_next_day?(date_string)
-    date = Date.parse(date_string)
-    today = Date.today
-    # today = Date.parse('2024-07-29T10:00-04:00')
-    date == today
-  end
-
-  def self.within_next_hour?(date_string)
-    datetime = Time.parse(date_string)
-    now = Time.now
-    # now = Time.parse('2024-07-29T18:00-04:00')
-    one_hour_from_now = now + 3600
-    datetime >= now && datetime <= one_hour_from_now
-  end
-
-  def self.format_slack(group, announcement_type)
-    return if group["eventSearch"]["count"] == 0
-
-    date_string = group["eventSearch"]["edges"][0]["node"]["dateTime"]
-    if announcement_type == "weekly"
-      return unless within_next_week?(date_string)
-    elsif announcement_type == "daily"
-      return unless within_next_day?(date_string)
-    else 
-      return unless within_next_hour?(date_string)
-    end
+  def self.format_slack(group)
+    return if group["unifiedEvents"]["count"] == 0
 
     event_blocks = [{
       type: "section",
       text: {
         type: "mrkdwn",
-        text: "*#{group["name"]}* - *#{group["eventSearch"]["edges"][0]["node"]["title"]}*\n:calendar: #{DateTime.parse(group["eventSearch"]["edges"][0]["node"]["dateTime"]).strftime("%A, %d %B %Y, %I:%M %p")}\n:busts_in_silhouette: #{group["eventSearch"]["edges"][0]["node"]["going"]} going"
+        text: "*#{group["name"]}* - *#{group["unifiedEvents"]["edges"][0]["node"]["title"]}*\n:calendar: #{DateTime.parse(group["unifiedEvents"]["edges"][0]["node"]["dateTime"]).strftime("%A, %d %B %Y, %I:%M %p")}\n:busts_in_silhouette: #{group["unifiedEvents"]["edges"][0]["node"]["going"]} going"
       },
       accessory: {
         type: "image",
-        image_url: group["eventSearch"]["edges"][0]["node"]["imageUrl"],
-        alt_text: "#{group["name"]} - #{group["eventSearch"]["edges"][0]["node"]["title"]}"
+        image_url: group["unifiedEvents"]["edges"][0]["node"]["imageUrl"],
+        alt_text: "#{group["name"]} - #{group["unifiedEvents"]["edges"][0]["node"]["title"]}"
       }
     },
       {
@@ -76,19 +45,19 @@ class MeetupEvent
               text: ":dart: RSVP",
               emoji: true
             },
-            url: group["eventSearch"]["edges"][0]["node"]["eventUrl"]
+            url: group["unifiedEvents"]["edges"][0]["node"]["eventUrl"]
           }
         ]
       },
     ]
 
     if group["name"] == "Tampa Devs"
-      event_blocks[0][:text][:text].prepend(":tampadevs: ")
+      event_blocks[0][:text][:text] = ":tampadevs:" + " " + event_blocks[0][:text][:text]
     end
 
-    if group["eventSearch"]["edges"][0]["node"]["venue"]
-      event_blocks[0][:text][:text] += if group["eventSearch"]["edges"][0]["node"]["venue"]["name"] != "Online event"
-        "\n\n:round_pushpin: <https://www.google.com/maps/dir/?api=1&destination=#{group["eventSearch"]["edges"][0]["node"]["venue"].map { |k, v| "#{k}=#{URI.encode_www_form_component(v)}" }.join("&")}|#{group["eventSearch"]["edges"][0]["node"]["venue"].values.join(", ")}>"
+    if group["unifiedEvents"]["edges"][0]["node"]["venue"]
+      event_blocks[0][:text][:text] += if group["unifiedEvents"]["edges"][0]["node"]["venue"]["name"] != "Online event"
+        "\n\n:round_pushpin: <https://www.google.com/maps/dir/?api=1&destination=#{group["unifiedEvents"]["edges"][0]["node"]["venue"].map { |k, v| "#{k}=#{URI.encode_www_form_component(v)}" }.join("&")}|#{group["unifiedEvents"]["edges"][0]["node"]["venue"].values.join(", ")}>"
       else
         "\n\n:computer: Online event"
       end
