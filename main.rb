@@ -18,12 +18,17 @@ class EventSyndicator
     sorted_events = []
     formatted_events = []
 
-    groups.each do |group|
-      sorted_events << group[1] unless group[1]["unifiedEvents"]["count"] == 0 || group[1]["unifiedEvents"]["edges"].empty?
+    # groups is a Hash: { "GroupUrlname" => { ...group payload... }, ... }
+    groups.values.each do |group|
+      conn = group.dig("events")
+      next unless conn && conn["totalCount"].to_i > 0 && conn["edges"].is_a?(Array) && !conn["edges"].empty?
+      sorted_events << group
     end
 
-    sorted_events.sort! do |a, b| 
-      DateTime.parse(a["unifiedEvents"]["edges"][0]["node"]["dateTime"]) <=> DateTime.parse(b["unifiedEvents"]["edges"][0]["node"]["dateTime"])
+    sorted_events.sort! do |a, b|
+      a_dt = DateTime.parse(a["events"]["edges"][0]["node"]["dateTime"])
+      b_dt = DateTime.parse(b["events"]["edges"][0]["node"]["dateTime"])
+      a_dt <=> b_dt
     end
 
     sorted_events.each do |group|
