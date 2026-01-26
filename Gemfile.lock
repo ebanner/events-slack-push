@@ -1,6 +1,19 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    ethon (0.15.0)
+      ffi (>= 1.15.0)
+    ffi (1.17.3)
+    ffi (1.17.3-arm64-darwin)
+    ffi (1.17.3-x86_64-linux-gnu)
+    typhoeus (1.5.0)
+      ethon (>= 0.9.0, < 0.16.0)
+
+GEM
+  remote: https://rubygems.pkg.github.com/tampadevs/
+  specs:
+    tampa_events_api (0.20260126.0324)
+      typhoeus (~> 1.0, >= 1.0.1)
 
 PLATFORMS
    x86_64-linux
@@ -11,6 +24,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  tampa_events_api (= 0.20260126.0324)!
 
 BUNDLED WITH
    2.5.9

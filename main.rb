@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "json"
-require "net/http"
+require "date"
+require "tampa_events_api"
 require_relative "event"
 require_relative "slack"
 
@@ -13,27 +13,14 @@ class EventSyndicator
   end
 
   def fetch
-    groups = JSON.parse(Net::HTTP.get(URI("https://events.api.tampa.dev/")))
+    api = TampaEventsAPI::EventsApi.new
+    events = api.call_20260125_events_next_get(within_days: "14", noempty: "1")
 
-    sorted_events = []
-    formatted_events = []
+    # Sort events by date (earliest first)
+    events.sort_by! { |e| DateTime.parse(e.date_time) }
 
-    # groups is a Hash: { "GroupUrlname" => { ...group payload... }, ... }
-    groups.values.each do |group|
-      conn = group.dig("events")
-      next unless conn && conn["totalCount"].to_i > 0 && conn["edges"].is_a?(Array) && !conn["edges"].empty?
-      sorted_events << group
-    end
-
-    sorted_events.sort! do |a, b|
-      a_dt = DateTime.parse(a["events"]["edges"][0]["node"]["dateTime"])
-      b_dt = DateTime.parse(b["events"]["edges"][0]["node"]["dateTime"])
-      a_dt <=> b_dt
-    end
-
-    sorted_events.each do |group|
-      event = MeetupEvent.format_slack(group)
-      formatted_events << event unless event.nil?
+    formatted_events = events.filter_map do |event|
+      MeetupEvent.format_slack(event)
     end
 
     if formatted_events.empty?
